@@ -15,4 +15,11 @@ function dydt = vector_field_kuramoto(~, y, omega, K)
     
     
     dydt = omega + K/N * sum(A.* sin(y' - y), 2);
+
+
+%     r = abs(mean(exp(1j*y)));
+%     dydt = omega + r*K*sin(-y);
+%     
+%     sum(abs(dydt -dydt2))
+
 end
