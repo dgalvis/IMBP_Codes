@@ -110,16 +110,45 @@ rng(10);
 phase_shift_figure(pi/4, make_figures, 'phase_shifts_1.png');
 
 %% N homogeneous oscillators, Mean phase zero frame
-N = 300;
+rng(11);
+N = 20;
 omega = zeros(N,1);
 K = 1;
 y0 = 2*pi*rand(N, 1);
+y0 = y0 -  angle(mean(exp(1j*y0),1)); % not necessary
 Tmax = 2*pi*10;
-options = odeset('RelTol', 1e-12, 'AbsTol',1e-12);
-[t, y] = ode15s(@(t,y)vector_field_kuramoto(t,y, omega, K), 0:0.03:Tmax, y0);
-y = mod(y -  angle(mean(exp(1j*y),2)), 2*pi);
-
+options = odeset('RelTol',1e-12,'AbsTol',1e-12);
+[t, y] = ode15s(@(t,y)vector_field_kuramoto(t,y, omega, K), 0:0.03:Tmax, y0, options);
+y = y -  angle(mean(exp(1j*y),2));
 movie1(t, y, make_figures, 'homogeneous_phase_zero', omega);
+
+
+% Important note: This method actually doesn't work for simulation (without
+% some finesse). The problem is that the mean phase drifts even in the
+% moving frame and this model -rKsin(theta) assumes that the mean phase
+% stays the same (0). This version of the model can only be used for finding
+% fixed points (and analysing stability) I think (but if anyone reads this
+% and can elaborate, that would be very useful.
+
+% So in the function vector_field_kuramoto_mean_field.m, I've added  y = y - angle(mean(exp(1j*y)));
+% so that the vector field gets a mean phase of zero at each time step.
+
+% Both functions now produce the same output, but you can note that y (above)
+% and y2 (below) both have drifting phase. So you need y2 = y2 -  angle(mean(exp(1j*y2),2));
+% to show the system in the frame where mean phase is always 0. 
+
+% dxdt(i) = -rKsin(x(i)) version
+rng(11);
+N = 20;
+K = 1;
+y0 = 2*pi*rand(N, 1);
+y0 = y0 -  angle(mean(exp(1j*y0),1)); % not necessary
+Tmax = 2*pi*10;
+[t, y2] = ode15s(@(t,y)vector_field_kuramoto_mean_field(t,y, K), 0:0.03:Tmax, y0, options);
+y2 = y2 -  angle(mean(exp(1j*y2),2));
+%movie1(t, y2, make_figures, 'homogeneous_phase_zero_v2', omega);
+
+
 
 %% N homogeneous oscillators, fixed points
 num_nodes = 6;
