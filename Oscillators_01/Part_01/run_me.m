@@ -144,11 +144,43 @@ K = 1;
 y0 = 2*pi*rand(N, 1);
 y0 = y0 -  angle(mean(exp(1j*y0),1)); % not necessary
 Tmax = 2*pi*10;
-[t, y2] = ode15s(@(t,y)vector_field_kuramoto_mean_field(t,y, K), 0:0.03:Tmax, y0, options);
+[t, y2] = ode15s(@(t,y)vector_field_kuramoto_mean_field(t,y, K, true), 0:0.03:Tmax, y0, options);
 y2 = y2 -  angle(mean(exp(1j*y2),2));
 %movie1(t, y2, make_figures, 'homogeneous_phase_zero_v2', omega);
 
+%% A question
+% Notice that for y0 = [pi/6;pi/6;-pi/3];, phi = 0.06 = angle(mean(exp(1j*y0),1)
+% but! sum(theta) = 0 (which must stay fixed!)
+% so phi must go from 0.06 to 0 over the simulation
+rng(11);
+N = 3;
+omega = zeros(N,1);
+K = 1;
+y0 = [pi/6;pi/6;-pi/3];
+Tmax = 2*pi*10;
+options = odeset('RelTol',1e-12,'AbsTol',1e-12);
+[t, y] = ode15s(@(t,y)vector_field_kuramoto(t,y, omega, K), 0:0.03:Tmax, y0, options);
+phi = angle(mean(exp(1j*y),2));
+figure();
+plot(t, phi);
 
+% now notice that if I use these this model dxdt_i = -rKsin(x_i) starting
+% with y0 = y0 - phi0, you still see phase shifts (plot(t, phi2)) in y2.
+% This means that the simulation above and below are not the same.
+% Unlike in the previous example, here I don't phase shift y2 in the vector
+% field (flag = false, see vector_field_kuramoto_mean_field.m).
+
+% dxdt(i) = -rKsin(x(i)) version
+rng(11);
+N = 3;
+K = 1;
+y0 = [pi/6;pi/6;-pi/3];
+y0 = y0 -  angle(mean(exp(1j*y0),1)); % not necessary
+Tmax = 2*pi*10;
+[t, y2] = ode15s(@(t,y)vector_field_kuramoto_mean_field(t,y, K, false), 0:0.03:Tmax, y0, options);
+phi2 = angle(mean(exp(1j*y2),2));
+figure();
+plot(t, phi2);
 
 %% N homogeneous oscillators, fixed points
 num_nodes = 6;
