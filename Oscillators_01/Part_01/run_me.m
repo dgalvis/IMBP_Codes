@@ -9,6 +9,10 @@ addpath('functions_figures');
 % 1) for figure/movie functions, set make_figures -> true to save a png/mp4
 make_figures = false;
 
+%% Sine/Cosine/Euler's formula
+movie0(make_figures, 'math_constructs.mp4');
+
+
 %% Disconnected Oscillators
 
 omega = [0.3; 0.6; 0.9];
